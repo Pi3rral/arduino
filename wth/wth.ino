@@ -126,12 +126,12 @@ void httpPOSTHT(ht_struct& ht) {
 #ifdef DEBUG
   Serial.println("SENT");
 #endif
-  delay(5000);
+  delay(2000);
   emptyESP8266();
   // Close connection if needed
-  espSerial.println("AT+CIPCLOSE");
-  delay(1000);
-  emptyESP8266();
+//  espSerial.println("AT+CIPCLOSE");
+//  delay(1000);
+//  emptyESP8266();
 }
 
 
