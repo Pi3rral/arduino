@@ -2,3 +2,4 @@ libraries
 .DS_Store
 .idea
 *.zip
+config.h
