@@ -4,6 +4,9 @@
 // config file defining SSID, PASSWORD, SERVER infos
 #include "config.h"
 
+// Uncomment to display debug info to Serial Monitor
+//#define DEBUG
+
 String WIFI_SSID     = SSID;
 String WIFI_PASSWORD = PASSWORD;
 String HOST_NAME     = SERVER_IP;
@@ -19,9 +22,11 @@ int    HOST_PORT     = SERVER_PORT;
 
 #define BAUD_RATE 115200
 
+#ifdef DEBUG
+#define SENDING_INTERVAL 20000 // DEBUG mode, send humidity and temperature every 20 seconds
+#else
 #define SENDING_INTERVAL 21600000 // send humidity and temperature every 6 hours (6*60*60*1000 = 21,600,000)
-
-#define DEBUG
+#endif
 
 SoftwareSerial espSerial(ESP_RXPIN, ESP_TXPIN); // RX, TX - reversed on ESP8266
 
