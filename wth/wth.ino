@@ -1,4 +1,5 @@
-#include <dht.h>
+// DHT sensor library from Adafruit - Version: Latest
+#include <DHT.h>
 #include "SoftwareSerial.h"
 
 // config file defining SSID, PASSWORD, SERVER infos
@@ -13,12 +14,13 @@ String HOST_NAME = SERVER_IP;
 int HOST_PORT = SERVER_PORT;
 
 #define DHT11_PIN 5
+#define DHT11_VCC_PIN 3
 #define ESP_RXPIN 10
 #define ESP_TXPIN 11
 
-#define LEDY_PIN 9
+#define LEDB_PIN 9
 #define LEDG_PIN 8
-#define LEDB_PIN 7
+#define LEDY_PIN 7
 
 #define BAUD_RATE 115200
 
@@ -30,11 +32,11 @@ int HOST_PORT = SERVER_PORT;
 
 SoftwareSerial espSerial(ESP_RXPIN, ESP_TXPIN); // RX, TX - reversed on ESP8266
 
-dht DHT;
+DHT dht11(DHT11_PIN, DHT11);
 
 struct ht_struct {
-    double temperature;
-    double humidity;
+    float temperature;
+    float humidity;
 };
 
 
@@ -45,9 +47,14 @@ ht_struct ht;
  * @param ht ht_struct to fill in temperature and humidity
  */
 void readHT(ht_struct &ht) {
-    DHT.read11(DHT11_PIN);
-    ht.temperature = DHT.temperature;
-    ht.humidity = DHT.humidity;
+    digitalWrite(LEDY_PIN, HIGH);
+    digitalWrite(DHT11_VCC_PIN, HIGH);
+    delay(20000);
+    dht11.begin();
+    ht.temperature = dht11.readTemperature(false, true);
+    ht.humidity = dht11.readHumidity();
+    digitalWrite(DHT11_VCC_PIN, LOW);
+    digitalWrite(LEDY_PIN, LOW);
 
 #ifdef DEBUG
     Serial.print("Temperature = ");
@@ -108,7 +115,7 @@ void httpPOSTHT(ht_struct &ht) {
 #endif
     // Create TCP Connection
     espSerial.println("AT+CIPSTART=\"TCP\",\"" + HOST_NAME + "\"," + HOST_PORT);
-    delay(1000);
+    delay(1500);
     emptyESP8266();
     // Create request HTTP command
     String request = "POST /wth/measures/?location=rangement&temperature=" + String(ht.temperature) + "&humidity=" +
@@ -116,7 +123,7 @@ void httpPOSTHT(ht_struct &ht) {
     request += "Host:" + HOST_NAME + ":" + HOST_PORT + "\r\n\r\n";
     // Set request size to ESP8266
     espSerial.println("AT+CIPSEND=" + String(request.length()));
-    delay(1000);
+    delay(1500);
     emptyESP8266();
     // Send request
 #ifdef DEBUG
@@ -145,16 +152,19 @@ void setup() {
     pinMode(LEDY_PIN, OUTPUT);
     pinMode(LEDG_PIN, OUTPUT);
     pinMode(LEDB_PIN, OUTPUT);
+    pinMode(DHT11_VCC_PIN, OUTPUT);
     delay(500);
     // Open yellow LED when connecting
     digitalWrite(LEDY_PIN, HIGH);
     digitalWrite(LEDG_PIN, LOW);
     digitalWrite(LEDB_PIN, LOW);
+    digitalWrite(DHT11_VCC_PIN, HIGH);
 #ifdef DEBUG
     Serial.begin(BAUD_RATE);
     Serial.println("Initializing...");
     delay(1000);
 #endif
+    // dht11.begin();
     // Init ESP8266 communication
     espSerial.begin(BAUD_RATE);
     delay(4000);
@@ -163,11 +173,7 @@ void setup() {
 #endif
     // Connect to wifi
     connectWifi();
-    // Do 2 reads of the DHT for "warming up" and wait a few seconds..
-    readHT(ht);
-    delay(20000);
-    readHT(ht);
-    delay(5000);
+    delay(3000);
     // shut down yellow LED, open green LED
     digitalWrite(LEDY_PIN, LOW);
     digitalWrite(LEDG_PIN, HIGH);
@@ -183,10 +189,7 @@ void setup() {
 void loop() {
     // Open blue LED when active
     digitalWrite(LEDB_PIN, HIGH);
-    // first read humidity and temperature to "warm up" DHT11
-    readHT(ht);
-    // wait and make a second read
-    delay(2000);
+    // read humidity and temperature
     readHT(ht);
     // send humidity and temperature
     httpPOSTHT(ht);
