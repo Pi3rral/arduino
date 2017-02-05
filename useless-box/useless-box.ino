@@ -5,19 +5,21 @@
 
 #include "UselessBox.h"
 
+
 #define UBPinSwitch    4
 
 #define UBPinServoDoor 5
-#define UBPinServoArm  6
+#define UBPinServoFinger  6
 
 #define UBServoDoorStartAngle 0
-#define UBServoDoorFinalAngle 30
+#define UBServoDoorFinalAngle 45
 
-#define UBServoArmStartAngle 0
-#define UBServoArmFinalAngle 45
+#define UBServoFingerStartAngle 0
+#define UBServoFingerFinalAngle 90
 
 UselessBox uselessBox(UBPinServoDoor, UBServoDoorStartAngle, UBServoDoorFinalAngle,
-                      UBPinServoArm, UBServoArmStartAngle, UBServoArmFinalAngle);
+                      UBPinServoFinger, UBServoFingerStartAngle, UBServoFingerFinalAngle);
+
 
 void setup() {
     uselessBox.begin();
@@ -25,5 +27,12 @@ void setup() {
 }
 
 void loop() {
-
+//    if(digitalRead(UBPinSwitch) == HIGH)
+//    {
+//        uselessBox.switchOff(1);
+//    }
+    uselessBox.switchOff(1);
+    delay(5000);
 }
+
+
