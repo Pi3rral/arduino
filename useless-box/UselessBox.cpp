@@ -39,7 +39,13 @@ void UselessBox::begin() {
 #endif
 }
 
-void UselessBox::moveServo(uint8_t servo, uint8_t angle, uint8_t speed) {
+uint8_t UselessBox::anglePercentToDegrees(uint8_t servo, uint8_t percent) {
+    return uint8_t(_servoStartAngle[servo]
+                   + ((_servoFinalAngle[servo] - _servoStartAngle[servo]) * percent / 100));
+}
+
+void UselessBox::moveServo(uint8_t servo, uint8_t percent, uint8_t speed) {
+    uint8_t angle = anglePercentToDegrees(servo, percent);
     int nbIter = angle - _servoCurrentAngle[servo];
     int multiplier = 1;
     if (nbIter < 0) {
@@ -56,17 +62,23 @@ void UselessBox::moveServo(uint8_t servo, uint8_t angle, uint8_t speed) {
 void UselessBox::switchOff(uint8_t how) {
     switch (how) {
         case 1:
-            openClose();
+            simpleClose();
             break;
         default:
-            openClose();
+            simpleClose();
             break;
     }
 }
 
-void UselessBox::openClose() {
-    moveServo(SERVO_DOOR_INDEX, _servoFinalAngle[SERVO_DOOR_INDEX]);
-    moveServo(SERVO_FINGER_INDEX, _servoFinalAngle[SERVO_FINGER_INDEX]);
-    moveServo(SERVO_FINGER_INDEX, _servoStartAngle[SERVO_FINGER_INDEX]);
-    moveServo(SERVO_DOOR_INDEX, _servoStartAngle[SERVO_DOOR_INDEX]);
+void UselessBox::simpleClose() {
+    moveServo(SERVO_DOOR_INDEX, 100);
+#ifdef USELESSBOX_WITH_HEAD
+    moveServo(SERVO_HEAD_INDEX, 100);
+#endif
+    moveServo(SERVO_FINGER_INDEX, 100);
+    moveServo(SERVO_FINGER_INDEX, 0);
+#ifdef USELESSBOX_WITH_HEAD
+    moveServo(SERVO_HEAD_INDEX, 0);
+#endif
+    moveServo(SERVO_DOOR_INDEX, 0);
 }

@@ -22,8 +22,8 @@ UselessBox uselessBox(UBPinServoDoor, UBServoDoorStartAngle, UBServoDoorFinalAng
 
 
 void setup() {
-    uselessBox.begin();
     pinMode(UBPinSwitch, INPUT);
+    uselessBox.begin();
 }
 
 void loop() {

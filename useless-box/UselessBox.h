@@ -43,19 +43,21 @@ public:
                uint8_t servoFingerStartAngle, uint8_t servoDoorFingerAngle
 #ifdef USELESSBOX_WITH_HEAD
                // If there is a 3rd servo to up and down the "head" that showing of when the door is opening
-               , uint8_t pinServoHead = 0,
+               , uint8_t pinServoHead,
                // Start angle and final angle when the head is at rest or showing of
-               uint8_t servoFingerHeadAngle = 0, uint8_t servoDoorHeadAngle = 0
+               uint8_t servoFingerHeadAngle, uint8_t servoDoorHeadAngle
 #endif
                );
 
     void begin();
 
-    void moveServo(uint8_t servo, uint8_t angle, uint8_t speed = SPEED_STD);
+    uint8_t anglePercentToDegrees(uint8_t servo, uint8_t percent);
+
+    void moveServo(uint8_t servo, uint8_t percent, uint8_t speed = SPEED_STD);
 
     void switchOff(uint8_t how);
 
-    void openClose();
+    void simpleClose();
 };
 
 #endif //ARDUINO_USELESSBOX_H
