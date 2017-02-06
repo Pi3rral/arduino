@@ -1,47 +1,47 @@
 #include "UselessBox.h"
 
 
-UselessBox::UselessBox(uint8_t pinServoDoor, uint8_t servoDoorStartAngle, uint8_t servoDoorFinalAngle,
-                       uint8_t pinServoFinger, uint8_t servoFingerStartAngle, uint8_t servoFingerFinalAngle
+UselessBox::UselessBox(uint8_t pinServoDoor, uint8_t minAngleServoDoor, uint8_t maxAngleServoDoor,
+                       uint8_t pinServoFinger, uint8_t minAngleServoFinger, uint8_t maxAngleServoFinger
 #ifdef USELESSBOX_WITH_HEAD
-                       , uint8_t pinServoHead, uint8_t servoHeadStartAngle, uint8_t servoHeadFinalAngle
+                       , uint8_t pinServoHead, uint8_t minAngleServoHead, uint8_t maxAngleServoHead
 #endif
                       )
 {
     _servoPin[SERVO_DOOR_INDEX] = pinServoDoor;
-    _servoStartAngle[SERVO_DOOR_INDEX] = servoDoorStartAngle;
-    _servoFinalAngle[SERVO_DOOR_INDEX] = servoDoorFinalAngle;
+    _servoMinAngle[SERVO_DOOR_INDEX] = minAngleServoDoor;
+    _servoMaxAngle[SERVO_DOOR_INDEX] = maxAngleServoDoor;
     
     _servoPin[SERVO_FINGER_INDEX] = pinServoFinger;
-    _servoStartAngle[SERVO_FINGER_INDEX] = servoFingerStartAngle;
-    _servoFinalAngle[SERVO_FINGER_INDEX] = servoFingerFinalAngle;
+    _servoMinAngle[SERVO_FINGER_INDEX] = minAngleServoFinger;
+    _servoMaxAngle[SERVO_FINGER_INDEX] = maxAngleServoFinger;
 
 #ifdef USELESSBOX_WITH_HEAD
     _servoPin[SERVO_HEAD_INDEX] = pinServoHead;
-    _servoStartAngle[SERVO_HEAD_INDEX] = servoHeadStartAngle;
-    _servoFinalAngle[SERVO_HEAD_INDEX] = servoHeadFinalAngle;
+    _servoMinAngle[SERVO_HEAD_INDEX] = minAngleServoHead;
+    _servoMaxAngle[SERVO_HEAD_INDEX] = maxAngleServoHead;
 #endif
 
 }
 
 void UselessBox::begin() {
     _servos[SERVO_DOOR_INDEX].attach(_servoPin[SERVO_DOOR_INDEX]);
-    _servos[SERVO_DOOR_INDEX].write(_servoStartAngle[SERVO_DOOR_INDEX]);
-    _servoCurrentAngle[SERVO_DOOR_INDEX] = _servoStartAngle[SERVO_DOOR_INDEX];
+    _servos[SERVO_DOOR_INDEX].write(_servoMinAngle[SERVO_DOOR_INDEX]);
+    _servoCurrentAngle[SERVO_DOOR_INDEX] = _servoMinAngle[SERVO_DOOR_INDEX];
     _servos[SERVO_FINGER_INDEX].attach(_servoPin[SERVO_FINGER_INDEX]);
-    _servos[SERVO_FINGER_INDEX].write(_servoStartAngle[SERVO_FINGER_INDEX]);
-    _servoCurrentAngle[SERVO_FINGER_INDEX] = _servoStartAngle[SERVO_FINGER_INDEX];
+    _servos[SERVO_FINGER_INDEX].write(_servoMinAngle[SERVO_FINGER_INDEX]);
+    _servoCurrentAngle[SERVO_FINGER_INDEX] = _servoMinAngle[SERVO_FINGER_INDEX];
 
 #ifdef USELESSBOX_WITH_HEAD
     _servos[SERVO_HEAD_INDEX].attach(_servoPin[SERVO_HEAD_INDEX]);
-    _servos[SERVO_HEAD_INDEX].write(_servoStartAngle[SERVO_HEAD_INDEX]);
-    _servoCurrentAngle[SERVO_HEAD_INDEX] = _servoStartAngle[SERVO_HEAD_INDEX];
+    _servos[SERVO_HEAD_INDEX].write(_servoMinAngle[SERVO_HEAD_INDEX]);
+    _servoCurrentAngle[SERVO_HEAD_INDEX] = _servoMinAngle[SERVO_HEAD_INDEX];
 #endif
 }
 
 uint8_t UselessBox::anglePercentToDegrees(uint8_t servo, uint8_t percent) {
-    return uint8_t(_servoStartAngle[servo]
-                   + ((_servoFinalAngle[servo] - _servoStartAngle[servo]) * percent / 100));
+    return uint8_t(_servoMinAngle[servo]
+                   + ((_servoMaxAngle[servo] - _servoMinAngle[servo]) * percent / 100));
 }
 
 void UselessBox::moveServo(uint8_t servo, uint8_t percent, uint8_t speed) {

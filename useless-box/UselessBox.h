@@ -6,7 +6,7 @@
 #include "Servo.h"
 
 
-//#define USELESSBOX_WITH_HEAD
+#define USELESSBOX_WITH_HEAD
 
 
 #define NB_SERVOS 2
@@ -29,23 +29,23 @@ class UselessBox {
 protected:
     Servo _servos[NB_SERVOS];
     uint8_t _servoPin[NB_SERVOS];
-    uint8_t _servoStartAngle[NB_SERVOS];
-    uint8_t _servoFinalAngle[NB_SERVOS];
+    uint8_t _servoMinAngle[NB_SERVOS];
+    uint8_t _servoMaxAngle[NB_SERVOS];
     uint8_t _servoCurrentAngle[NB_SERVOS];
 
 public:
     UselessBox(uint8_t pinServoDoor, // Servo opening the main door
-               // Start angle and final angle when the door is closed or full open
-               uint8_t servoDoorStartAngle, uint8_t servoDoorFinalAngle,
+               // min and max angle when the door is closed or full open
+               uint8_t minAngleServoDoor, uint8_t maxAngleServoDoor,
                // Servo manipulating the finger to close the switch
                uint8_t pinServoFinger,
-               // Start angle and final angle when the finger is at rest or switching off
-               uint8_t servoFingerStartAngle, uint8_t servoDoorFingerAngle
+               // min and max angle when the finger is at rest or switching off
+               uint8_t minAngleServoFinger, uint8_t maxAngleServoFinger
 #ifdef USELESSBOX_WITH_HEAD
                // If there is a 3rd servo to up and down the "head" that showing of when the door is opening
                , uint8_t pinServoHead,
-               // Start angle and final angle when the head is at rest or showing of
-               uint8_t servoFingerHeadAngle, uint8_t servoDoorHeadAngle
+               // min and max final angle when the head is at rest or showing of
+               uint8_t minAngleServoHead, uint8_t servoDoorHeadAngle
 #endif
                );
 
