@@ -1,4 +1,4 @@
-// DHT sensor library from Adafruit - Version: Latest
+// DHT sensor library - Version: Latest
 #include <DHT.h>
 #include "SoftwareSerial.h"
 
@@ -6,7 +6,7 @@
 #include "config.h"
 
 // Uncomment to display debug info to Serial Monitor
-//#define DEBUG
+// #define DEBUG
 
 String WIFI_SSID = SSID;
 String WIFI_PASSWORD = PASSWORD;
@@ -22,12 +22,19 @@ int HOST_PORT = SERVER_PORT;
 #define LEDG_PIN 8
 #define LEDY_PIN 7
 
+#define MIN_TEMP 0
+#define MAX_TEMP 100
+#define MIN_HUM 0
+#define MAX_HUM 100
+
+#define NB_READING 5
+
 #define BAUD_RATE 115200
 
 #ifdef DEBUG
-#define SENDING_INTERVAL 20000 // DEBUG mode, send humidity and temperature every 20 seconds
+#define SENDING_INTERVAL 30000 // DEBUG mode, send humidity and temperature every 30 seconds
 #else
-#define SENDING_INTERVAL 21600000 // send humidity and temperature every 6 hours (6*60*60*1000 = 21,600,000)
+#define SENDING_INTERVAL 3600000 // send humidity and temperature every hour (60*60*1000 = 3,600,000)
 #endif
 
 SoftwareSerial espSerial(ESP_RXPIN, ESP_TXPIN); // RX, TX - reversed on ESP8266
@@ -39,6 +46,8 @@ struct ht_struct {
     float humidity;
 };
 
+int temp_reading[NB_READING];
+int hum_reading[NB_READING];
 
 ht_struct ht;
 
@@ -49,14 +58,34 @@ ht_struct ht;
 void readHT(ht_struct &ht) {
     digitalWrite(LEDY_PIN, HIGH);
     digitalWrite(DHT11_VCC_PIN, HIGH);
-    delay(20000);
+    // wait 10 second after switch on sensor
+    delay(10000);
     dht11.begin();
-    ht.temperature = dht11.readTemperature(false, true);
-    ht.humidity = dht11.readHumidity();
+    // read many times (NB_READING) temperature and humidity
+    for (int i = 0; i < NB_READING; ++i) {
+        temp_reading[i] = dht11.readTemperature(false, true);
+        hum_reading[i] = dht11.readHumidity();
+#ifdef DEBUG
+        Serial.print("Reading ");
+        Serial.println(i);
+        Serial.print("Temperature = ");
+        Serial.println(temp_reading[i]);
+        Serial.print("Humidity = ");
+        Serial.println(hum_reading[i]);
+#endif
+        delay(1000);
+    }
+    // sort arrays
+    bubbleSort(temp_reading);
+    bubbleSort(hum_reading);
+    // then get the middle values
+    ht.temperature = temp_reading[(int)(NB_READING / 2)];
+    ht.humidity = hum_reading[(int)(NB_READING / 2)];
     digitalWrite(DHT11_VCC_PIN, LOW);
     digitalWrite(LEDY_PIN, LOW);
 
 #ifdef DEBUG
+    Serial.println("Captured values (after sort)");
     Serial.print("Temperature = ");
     Serial.println(ht.temperature);
     Serial.print("Humidity = ");
@@ -65,6 +94,27 @@ void readHT(ht_struct &ht) {
 }
 
 
+/**
+ * Bubble sort of an array of int
+ * @param a array of int
+ */
+void bubbleSort(int * a) {
+    bool perm = false;
+    do {
+        for (int i = 0; i < (NB_READING-1); ++i) {
+            if (a[i] > a[i+1]) {
+                int t = a[i+1];
+                a[i+1] = a[i];
+                a[i] = t;
+            }
+        }
+    } while (perm);
+}
+
+
+/**
+ * Clear ESP8266 inputs
+ */
 void emptyESP8266() {
     while (espSerial.available()) {
 #ifdef DEBUG
@@ -164,7 +214,6 @@ void setup() {
     Serial.println("Initializing...");
     delay(1000);
 #endif
-    // dht11.begin();
     // Init ESP8266 communication
     espSerial.begin(BAUD_RATE);
     delay(4000);
