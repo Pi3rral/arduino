@@ -101,11 +101,13 @@ void readHT(ht_struct &ht) {
 void bubbleSort(int * a) {
     bool perm = false;
     do {
+        perm = false;
         for (int i = 0; i < (NB_READING-1); ++i) {
             if (a[i] > a[i+1]) {
                 int t = a[i+1];
                 a[i+1] = a[i];
                 a[i] = t;
+                perm = true;
             }
         }
     } while (perm);
